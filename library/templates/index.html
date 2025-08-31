@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Library Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Welcome Section -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-dark">📚 Welcome to the Library Management System</h1>
+        <p class="text-muted fs-5">Manage your books, students, and issued records seamlessly</p>
+    </div>
+
+   <div class="container my-5">
+    <div class="row text-center">
+
+        <!-- Books Card -->
+        <div class="col-md-3 mb-4 d-flex">
+            <div class="card shadow-lg border-0 rounded-4 w-100 h-100">
+                <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80"
+                     class="card-img-top img-fixed" alt="Books">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Books</h5>
+                    <p class="card-text text-muted">Explore our complete library collection.</p>
+                    <a href="{% url 'view_books' %}" class="btn btn-primary rounded-pill px-4">View Books</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Card -->
+        <div class="col-md-3 mb-4 d-flex">
+            <div class="card shadow-lg border-0 rounded-4 w-100 h-100">
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80"
+                     class="card-img-top img-fixed" alt="Students">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Students</h5>
+                    <p class="card-text text-muted">Manage student profiles and details.</p>
+                    <a href="{% url 'view_students' %}" class="btn btn-success rounded-pill px-4">View Students</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issued Books Card -->
+        <div class="col-md-3 mb-4 d-flex">
+            <div class="card shadow-lg border-0 rounded-4 w-100 h-100">
+                <img src="https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=800&q=80"
+                     class="card-img-top img-fixed" alt="Issued Books">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Issued Books</h5>
+                    <p class="card-text text-muted">Track all issued and returned books.</p>
+                    <a href="{% url 'view_issued_book' %}" class="btn btn-warning rounded-pill px-4 text-white">View Issued</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="col-md-3 mb-4 d-flex">
+            <div class="card shadow-lg border-0 rounded-4 w-100 h-100">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"
+     class="card-img-top img-fixed" alt="Profile">
+
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Profile</h5>
+                    <p class="card-text text-muted">Manage your personal information.</p>
+                    <a href="{% url 'profile' %}" class="btn btn-info rounded-pill px-4 text-white">View Profile</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- Ensure equal image size for all cards using Bootstrap utility classes -->
+<style>
+.img-fixed {
+  height: 180px;
+  width: 100%;
+  object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  transition: transform 0.3s ease;
+  aspect-ratio: 16/9; /* Ensures consistent width/height ratio */
+  background: #f8f9fa; /* fallback background */
+}
+</style>
+
+
+
+
+        
+
+        
+        
+
+    <!-- CTA Section -->
+    <div class="mt-5 text-center">
+        <h3 class="fw-bold">📖 Explore. Borrow. Learn.</h3>
+        <p class="text-muted fs-6">Your one-stop solution to manage books and students efficiently.</p>
+        <a href="/student_registration/" class="btn btn-lg btn-dark mt-3">Get Started</a>
+    </div>
+
+</div>
+{% endblock %}
+/* Fix image height & make them equal */
+<style>
+/* Force all images to be the same size */
+.img-fixed {
+    height: 180px;               /* Fixed height for all images */
+    width: 100%;
+    object-fit: cover;           /* Crop the image without distortion */
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    transition: transform 0.3s ease;
+}
+
+/* Zoom effect on hover */
+.img-fixed:hover {
+    transform: scale(1.05);
+}
+
+/* Card design */
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s ease-in-out;
+    border-radius: 12px;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Card titles */
+.card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+/* Buttons */
+.btn {
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+}
+
+</style>

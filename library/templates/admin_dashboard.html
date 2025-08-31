@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="fw-bold text-center mb-4">📊 Admin Dashboard</h2>
+    <hr>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <!-- Total Books -->
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-primary text-white">
+                <i class="bi bi-book fs-1"></i>
+                <h4 class="fw-bold mt-2">{{ total_books }}</h4>
+                <p class="mb-0">Total Books</p>
+            </div>
+        </div>
+
+        <!-- Total Students -->
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-success text-white">
+                <i class="bi bi-people-fill fs-1"></i>
+                <h4 class="fw-bold mt-2">{{ total_students }}</h4>
+                <p class="mb-0">Registered Students</p>
+            </div>
+        </div>
+
+        <!-- Issued Books -->
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-warning text-dark">
+                <i class="bi bi-arrow-left-right fs-1"></i>
+                <h4 class="fw-bold mt-2">{{ issued_books }}</h4>
+                <p class="mb-0">Issued Books</p>
+            </div>
+        </div>
+
+        <!-- Overdue Books -->
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-danger text-white">
+                <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+                <h4 class="fw-bold mt-2">{{ overdue_books }}</h4>
+                <p class="mb-0">Overdue Books</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="card shadow border-0 rounded-4 p-4">
+        <h5 class="fw-bold mb-3">Books Overview</h5>
+        <canvas id="booksChart" height="120"></canvas>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('booksChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Available Books', 'Issued Books', 'Overdue Books'],
+            datasets: [{
+                data: [{{ available_books }}, {{ issued_books }}, {{ overdue_books }}],
+                backgroundColor: ['#0d6efd', '#ffc107', '#dc3545'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

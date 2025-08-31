@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Issue Book{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4">
+                    <!-- Page Heading -->
+                    <h3 class="fw-bold text-center mb-4">📖 Issue a Book</h3>
+
+                    <!-- Success Message -->
+                    {% if success %}
+                        <div class="alert alert-success text-center">
+                            ✅ Book issued successfully!
+                        </div>
+                    {% endif %}
+
+                    <!-- Error Message -->
+                    {% if error %}
+                        <div class="alert alert-danger text-center">
+                            ⚠️ {{ error }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Issue Book Form -->
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <!-- Student Selection -->
+                        <div class="mb-3">
+                            <label for="student_id" class="form-label fw-semibold">Select Student</label>
+                            <select name="student_id" id="student_id" class="form-select" required>
+                                <option value="" disabled selected>-- Choose a Student --</option>
+                                {% for student in students %}
+                                    <option value="{{ student.user.id }}">
+                                        {{ student.user.first_name }} {{ student.user.last_name }} ({{ student.roll_no }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Book Selection -->
+                        <div class="mb-3">
+                            <label for="isbn" class="form-label fw-semibold">Select Book</label>
+                            <select name="isbn" id="isbn" class="form-select" required>
+                                <option value="" disabled selected>-- Choose a Book --</option>
+                                {% for book in books %}
+                                    <option value="{{ book.isbn }}">
+                                        {{ book.name }} by {{ book.author }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Issue Date -->
+                        <div class="mb-3">
+                            <label for="issue_date" class="form-label fw-semibold">Issue Date</label>
+                            <input type="date" name="issue_date" id="issue_date" class="form-control" required>
+                        </div>
+
+                        <!-- Expiry Date -->
+                        <div class="mb-3">
+                            <label for="expiry_date" class="form-label fw-semibold">Expiry Date</label>
+                            <input type="date" name="expiry_date" id="expiry_date" class="form-control" required>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-plus-circle"></i> Issue Book
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Back Button -->
+                    <div class="text-center mt-3">
+                        <a href="/view_issued_book/" class="text-decoration-none">
+                            <i class="bi bi-arrow-left-circle"></i> Back to Issued Books
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Live Validation Script -->
+<script>
+    document.querySelector("form").addEventListener("submit", function(e) {
+        const student = document.getElementById("student_id").value;
+        const isbn = document.getElementById("isbn").value;
+        const issueDate = document.getElementById("issue_date").value;
+        const expiryDate = document.getElementById("expiry_date").value;
+
+        if (!student || !isbn || !issueDate || !expiryDate) {
+            e.preventDefault();
+            alert("⚠️ Please fill out all fields before submitting!");
+        }
+    });
+</script>
+{% endblock %}

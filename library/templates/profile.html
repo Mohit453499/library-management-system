@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-dark text-white text-center rounded-top">
+                    <h3><i class="bi bi-person-circle"></i> My Profile</h3>
+                </div>
+                <div class="card-body p-4">
+                    {% if student %}
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                {% if student.image %}
+                                    <img src="{{ student.image.url }}" alt="Profile Image" class="rounded-circle border border-3 shadow" width="150" height="150">
+                                {% else %}
+                                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Default Image" class="rounded-circle border border-3 shadow" width="150" height="150">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <th>Name:</th>
+                                            <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Username:</th>
+                                            <td>{{ student.user.username }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Email:</th>
+                                            <td>{{ student.user.email }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Phone:</th>
+                                            <td>{{ student.phone }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Branch:</th>
+                                            <td>{{ student.branch }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Classroom:</th>
+                                            <td>{{ student.classroom }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Roll No:</th>
+                                            <td>{{ student.roll_no }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <a href="/edit_profile/" class="btn btn-primary mt-2"><i class="bi bi-pencil-square"></i> Edit Profile</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="text-center text-danger">Student details not found!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

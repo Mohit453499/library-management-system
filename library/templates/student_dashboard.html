@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="fw-bold text-center mb-4">📚 Student Dashboard</h2>
+    <hr>
+
+    <!-- Stats Cards -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-primary text-white">
+                <i class="bi bi-book fs-1"></i>
+                <h4 class="fw-bold mt-2">{{ available_books }}</h4>
+                <p class="mb-0">Available Books</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-warning text-dark">
+                <i class="bi bi-clipboard-check fs-1"></i>
+                <h4 class="fw-bold mt-2">{{ issued_books }}</h4>
+                <p class="mb-0">My Issued Books</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-danger text-white">
+                <i class="bi bi-exclamation-triangle fs-1"></i>
+                <h4 class="fw-bold mt-2">{{ overdue_books }}</h4>
+                <p class="mb-0">Overdue Books</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access -->
+    <div class="text-center mt-4">
+        <a href="/student_issued/" class="btn btn-primary btn-lg">
+            <i class="bi bi-eye"></i> View My Issued Books
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Issued Books{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold">📖 Issued Books</h2>
+        <a href="/issue_book/" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Issue New Book
+        </a>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="input-group mb-3">
+        <span class="input-group-text bg-dark text-white"><i class="bi bi-search"></i></span>
+        <input type="text" id="issuedSearch" class="form-control" placeholder="Search by student name, book name, or ISBN...">
+    </div>
+
+    <!-- Issued Books Table -->
+    <div class="table-responsive shadow-lg rounded-3">
+        <table class="table table-hover table-striped align-middle" id="issuedTable">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Book</th>
+                    <th>ISBN</th>
+                    <th>Issued Date</th>
+                    <th>Expiry Date</th>
+                    <th>Fine</th>
+                </tr>
+            </thead>
+            <tbody id="issuedTableBody" class="text-center">
+                {% if details %}
+                    {% for detail in details %}
+                    <tr {% if detail.6 > 0 %} class="table-danger" {% endif %}>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <strong>{{ detail.0.get_full_name }}</strong><br>
+                            <small class="text-muted">ID: {{ detail.1 }}</small>
+                        </td>
+                        <td>{{ detail.2 }}</td>
+                        <td><span class="badge bg-secondary">{{ detail.3 }}</span></td>
+                        <td>{{ detail.4 }}</td>
+                        <td>{{ detail.5 }}</td>
+                        <td>
+                            {% if detail.6 > 0 %}
+                                <span class="badge bg-danger">₹{{ detail.6 }}</span>
+                            {% else %}
+                                <span class="badge bg-success">No Fine</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            No issued books found.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Live Search Script -->
+<script>
+    document.getElementById("issuedSearch").addEventListener("keyup", function() {
+        let value = this.value.toLowerCase();
+        let rows = document.querySelectorAll("#issuedTableBody tr");
+
+        rows.forEach(function(row) {
+            row.style.display = row.textContent.toLowerCase().includes(value) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}

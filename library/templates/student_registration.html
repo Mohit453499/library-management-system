@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Student Registration{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="row g-0">
+                    <!-- Left Banner Image -->
+                    <div class="col-md-5 d-none d-md-block">
+                        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80" 
+                             class="img-fluid h-100 rounded-start" 
+                             alt="Student Registration">
+                    </div>
+
+                    <!-- Right Registration Form -->
+                    <div class="col-md-7">
+                        <div class="card-body p-4">
+                            <h3 class="card-title text-center fw-bold mb-4">📝 Student Registration</h3>
+
+                            <!-- Password mismatch alert -->
+                            {% if passnotmatch %}
+                                <div class="alert alert-danger text-center">
+                                    Passwords do not match. Please try again.
+                                </div>
+                            {% endif %}
+
+                            <!-- Success alert -->
+                            {% if alert %}
+                                <div class="alert alert-success text-center">
+                                    Registration successful! 🎉 You can now <a href="/student_login/" class="alert-link">login</a>.
+                                </div>
+                            {% endif %}
+
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+
+                                <!-- Username -->
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
+                                        <input type="text" name="username" id="username" class="form-control" placeholder="Enter a unique username" required>
+                                    </div>
+                                </div>
+
+                                <!-- Name Fields -->
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="first_name" class="form-label">First Name</label>
+                                        <input type="text" name="first_name" id="first_name" class="form-control" placeholder="First Name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="last_name" class="form-label">Last Name</label>
+                                        <input type="text" name="last_name" id="last_name" class="form-control" placeholder="Last Name" required>
+                                    </div>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                        <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email" required>
+                                    </div>
+                                </div>
+
+                                <!-- Phone -->
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                        <input type="text" name="phone" id="phone" class="form-control" placeholder="Enter your phone number" required>
+                                    </div>
+                                </div>
+
+                                <!-- Branch & Classroom -->
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="branch" class="form-label">Branch</label>
+                                        <input type="text" name="branch" id="branch" class="form-control" placeholder="e.g. CSE, ECE, ME" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="classroom" class="form-label">Classroom</label>
+                                        <input type="text" name="classroom" id="classroom" class="form-control" placeholder="Enter your class" required>
+                                    </div>
+                                </div>
+
+                                <!-- Roll Number -->
+                                <div class="mb-3">
+                                    <label for="roll_no" class="form-label">Roll Number</label>
+                                    <input type="text" name="roll_no" id="roll_no" class="form-control" placeholder="Enter your roll number" required>
+                                </div>
+
+                                <!-- Profile Image Upload -->
+                                <div class="mb-3">
+                                    <label for="image" class="form-label">Profile Picture</label>
+                                    <input type="file" name="image" id="image" class="form-control" accept="image/*" onchange="previewImage(event)" required>
+                                    <div class="text-center mt-3">
+                                        <img id="preview" src="https://via.placeholder.com/120" class="rounded-circle shadow" width="120" height="120" style="display:none;">
+                                    </div>
+                                </div>
+
+                                <!-- Password & Confirm Password -->
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input type="password" name="password" id="password" class="form-control" placeholder="Enter password" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                                        <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Confirm password" required>
+                                    </div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn btn-success btn-lg">Register</button>
+                                </div>
+                            </form>
+
+                            <!-- Already Registered -->
+                            <div class="text-center mt-4">
+                                <p>Already registered? 
+                                    <a href="/student_login/" class="text-decoration-none fw-bold">Login here</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- row -->
+            </div> <!-- card -->
+        </div>
+    </div>
+</div>
+
+<!-- Live Preview Script -->
+<script>
+    function previewImage(event) {
+        const preview = document.getElementById('preview');
+        preview.src = URL.createObjectURL(event.target.files[0]);
+        preview.style.display = 'block';
+    }
+</script>
+{% endblock %}

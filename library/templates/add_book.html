@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Add Book{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4">
+                    <!-- Heading -->
+                    <h3 class="fw-bold text-center mb-4">📚 Add New Book</h3>
+
+                    <!-- Success Message -->
+                    {% if success %}
+                        <div class="alert alert-success text-center">
+                            ✅ Book added successfully!
+                        </div>
+                    {% endif %}
+
+                    <!-- Error Message -->
+                    {% if error %}
+                        <div class="alert alert-danger text-center">
+                            ⚠️ {{ error }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Add Book Form -->
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Book Name -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-semibold">Book Name</label>
+                            <input type="text" name="name" id="name" class="form-control" placeholder="Enter book name" required>
+                        </div>
+
+                        <!-- Author -->
+                        <div class="mb-3">
+                            <label for="author" class="form-label fw-semibold">Author</label>
+                            <input type="text" name="author" id="author" class="form-control" placeholder="Enter author's name" required>
+                        </div>
+
+                        <!-- ISBN -->
+                        <div class="mb-3">
+                            <label for="isbn" class="form-label fw-semibold">ISBN</label>
+                            <input type="text" name="isbn" id="isbn" class="form-control" placeholder="Enter ISBN number" required>
+                        </div>
+
+                        <!-- Category Dropdown -->
+                        <div class="mb-3">
+                            <label for="category" class="form-label fw-semibold">Category</label>
+                            <select name="category" id="category" class="form-select" required>
+                                <option value="" disabled selected>-- Choose a Category --</option>
+                                <option value="Science">Science</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Engineering">Engineering</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Fiction">Fiction</option>
+                                <option value="Non-fiction">Non-fiction</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+
+                        <!-- Cover Image Upload -->
+                        <div class="mb-3">
+                            <label for="cover_image" class="form-label fw-semibold">Book Cover (Optional)</label>
+                            <input type="file" name="cover_image" id="cover_image" class="form-control" accept="image/*" onchange="previewCover(this)">
+                        </div>
+
+                        <!-- Preview Image -->
+                        <div class="text-center mb-3">
+                            <img id="coverPreview" src="https://cdn-icons-png.flaticon.com/512/29/29302.png" 
+                                 alt="Cover Preview" width="120" height="160" 
+                                 class="rounded shadow d-none" 
+                                 style="object-fit: cover;">
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-plus-circle"></i> Add Book
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Back Button -->
+                    <div class="text-center mt-3">
+                        <a href="/view_books/" class="text-decoration-none">
+                            <i class="bi bi-arrow-left-circle"></i> Back to Books
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cover Image Preview Script -->
+<script>
+    function previewCover(input) {
+        const preview = document.getElementById('coverPreview');
+        if (input.files && input.files[0]) {
+            preview.src = URL.createObjectURL(input.files[0]);
+            preview.classList.remove('d-none');
+        } else {
+            preview.classList.add('d-none');
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4">
+                    <!-- Heading -->
+                    <h3 class="fw-bold text-center mb-4">✏️ Edit Profile</h3>
+                    <hr>
+
+                    <!-- Success Message -->
+                    {% if success %}
+                        <div class="alert alert-success text-center">
+                            ✅ Profile updated successfully!
+                        </div>
+                    {% endif %}
+
+                    <!-- Error Message -->
+                    {% if error %}
+                        <div class="alert alert-danger text-center">
+                            ⚠️ {{ error }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Edit Profile Form -->
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="row g-4">
+                            <!-- Profile Image -->
+                            <div class="col-md-4 text-center">
+                                {% if student.image %}
+                                    <img id="profilePreview" src="{{ student.image.url }}" 
+                                         alt="Profile Picture" width="150" height="150" 
+                                         class="rounded-circle shadow" style="object-fit: cover;">
+                                {% else %}
+                                    <img id="profilePreview" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" 
+                                         alt="Default Profile" width="150" height="150" 
+                                         class="rounded-circle shadow" style="object-fit: cover;">
+                                {% endif %}
+                                <div class="mt-3">
+                                    <input type="file" name="image" id="image" class="form-control" accept="image/*" onchange="previewImage(this)">
+                                </div>
+                            </div>
+
+                            <!-- Editable Fields -->
+                            <div class="col-md-8">
+                                <!-- First Name -->
+                                <div class="mb-3">
+                                    <label for="first_name" class="form-label fw-semibold">First Name</label>
+                                    <input type="text" name="first_name" id="first_name" class="form-control" 
+                                           value="{{ student.user.first_name }}" required>
+                                </div>
+
+                                <!-- Last Name -->
+                                <div class="mb-3">
+                                    <label for="last_name" class="form-label fw-semibold">Last Name</label>
+                                    <input type="text" name="last_name" id="last_name" class="form-control" 
+                                           value="{{ student.user.last_name }}" required>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="mb-3">
+                                    <label for="email" class="form-label fw-semibold">Email</label>
+                                    <input type="email" name="email" id="email" class="form-control" 
+                                           value="{{ student.user.email }}" required>
+                                </div>
+
+                                <!-- Phone -->
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label fw-semibold">Phone</label>
+                                    <input type="text" name="phone" id="phone" class="form-control" 
+                                           value="{{ student.phone }}" required>
+                                </div>
+
+                                <!-- Branch -->
+                                <div class="mb-3">
+                                    <label for="branch" class="form-label fw-semibold">Branch</label>
+                                    <select name="branch" id="branch" class="form-select" required>
+                                        <option value="" disabled>Select Branch</option>
+                                        <option value="CSE" {% if student.branch == 'CSE' %}selected{% endif %}>CSE</option>
+                                        <option value="IT" {% if student.branch == 'IT' %}selected{% endif %}>IT</option>
+                                        <option value="ECE" {% if student.branch == 'ECE' %}selected{% endif %}>ECE</option>
+                                        <option value="ME" {% if student.branch == 'ME' %}selected{% endif %}>ME</option>
+                                        <option value="CE" {% if student.branch == 'CE' %}selected{% endif %}>CE</option>
+                                    </select>
+                                </div>
+
+                                <!-- Classroom -->
+                                <div class="mb-3">
+                                    <label for="classroom" class="form-label fw-semibold">Classroom</label>
+                                    <input type="text" name="classroom" id="classroom" class="form-control" 
+                                           value="{{ student.classroom }}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Back Button -->
+                    <div class="text-center mt-3">
+                        <a href="/profile/" class="text-decoration-none">
+                            <i class="bi bi-arrow-left-circle"></i> Back to Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Live Profile Image Preview Script -->
+<script>
+    function previewImage(input) {
+        const preview = document.getElementById('profilePreview');
+        if (input.files && input.files[0]) {
+            preview.src = URL.createObjectURL(input.files[0]);
+        }
+    }
+</script>
+{% endblock %}
