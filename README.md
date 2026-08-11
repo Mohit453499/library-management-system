@@ -19,5 +19,5 @@ Provides role-based dashboards for **admins** and **students** with book managem
 
 ---
 
-### 🌐 Live Demo (Optional)
+### 🌐 Live Demo 
 *Coming Soon...*
