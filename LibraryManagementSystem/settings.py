@@ -5,9 +5,12 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
-SECRET_KEY = '(*h%h-rc^kh_ob18is3j+c6@*3b92&9p^%s2lf^qas^lk3*n_q'
-DEBUG = False  # Keep False in production, True locally if needed
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-local-development-key-change-in-production'
+)
 
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = ['mohit.pythonanywhere.com', 'www.mohit.pythonanywhere.com', '127.0.0.1', 'localhost']
 
 # APPLICATIONS
