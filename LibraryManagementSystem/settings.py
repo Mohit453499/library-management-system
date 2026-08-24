@@ -11,8 +11,10 @@ SECRET_KEY = os.environ.get(
 )
 
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = ['mohit.pythonanywhere.com', 'www.mohit.pythonanywhere.com', '127.0.0.1', 'localhost']
-
+ALLOWED_HOSTS = os.environ.get(
+    'DJANGO_ALLOWED_HOSTS',
+    '127.0.0.1,localhost'
+).split(',')
 # APPLICATIONS
 INSTALLED_APPS = [
     'django.contrib.admin',
