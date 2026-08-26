@@ -3,235 +3,566 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from datetime import date
 
-from .models import *
+from .models import Book, Student, IssuedBook
 from .forms import IssueBookForm
-from . import forms, models
 
-# ------------------------------
-# INDEX / HOME PAGE
-# ------------------------------
+
+# =========================================================
+# HOME / INDEX
+# =========================================================
+
 def index(request):
-    return render(request, "index.html")
+    total_books = Book.objects.count()
+    total_students = Student.objects.count()
+    issued_books = IssuedBook.objects.count()
+
+    # Count unique books currently issued
+    issued_isbns = set(
+        IssuedBook.objects.values_list('isbn', flat=True)
+    )
+
+    available_books = total_books - len(issued_isbns)
+
+    categories = (
+        Book.objects
+        .values_list('category', flat=True)
+        .distinct()
+        .order_by('category')
+    )
+
+    recent_books = Book.objects.all().order_by('-id')[:6]
+
+    return render(request, "index.html", {
+        'total_books': total_books,
+        'total_students': total_students,
+        'issued_books': issued_books,
+        'available_books': max(available_books, 0),
+        'categories': categories,
+        'recent_books': recent_books,
+    })
 
 
-# ------------------------------
-# ADD BOOK (Admin Only)
-# ------------------------------
+# =========================================================
+# BROWSE BOOKS
+# =========================================================
+
+def browse_books(request):
+
+    books = Book.objects.all().order_by('-id')
+
+    search = request.GET.get('search', '').strip()
+    category = request.GET.get('category', '').strip()
+
+    if search:
+
+        books = books.filter(
+            Q(name__icontains=search) |
+            Q(author__icontains=search)
+        )
+
+        # Search by ISBN if numeric
+        if search.isdigit():
+            books = (
+                books |
+                Book.objects.filter(isbn=int(search))
+            )
+
+    if category:
+        books = books.filter(category=category)
+
+    categories = (
+        Book.objects
+        .values_list('category', flat=True)
+        .distinct()
+        .order_by('category')
+    )
+
+    # Currently issued ISBNs
+    issued_isbns = set(
+        str(isbn)
+        for isbn in IssuedBook.objects.values_list('isbn', flat=True)
+    )
+
+    return render(request, 'browse_books.html', {
+        'books': books.distinct(),
+        'categories': categories,
+        'search': search,
+        'selected_category': category,
+        'issued_isbns': issued_isbns,
+    })
+
+
+# =========================================================
+# ADD BOOK
+# =========================================================
+
 @login_required(login_url='/admin_login')
 def add_book(request):
+
     if request.method == "POST":
-        name = request.POST['name']
-        author = request.POST['author']
-        isbn = request.POST['isbn']
-        category = request.POST['category']
 
-        books = Book.objects.create(name=name, author=author, isbn=isbn, category=category)
-        books.save()
-        alert = True
-        return render(request, "add_book.html", {'alert': alert})
+        name = request.POST.get('name')
+        author = request.POST.get('author')
+        isbn = request.POST.get('isbn')
+        category = request.POST.get('category')
+
+        try:
+
+            Book.objects.create(
+                name=name,
+                author=author,
+                isbn=isbn,
+                category=category
+            )
+
+            return render(request, "add_book.html", {
+                'success': True
+            })
+
+        except Exception as e:
+
+            return render(request, "add_book.html", {
+                'error': str(e)
+            })
+
     return render(request, "add_book.html")
+
+
+# =========================================================
+# VIEW BOOKS
+# =========================================================
+
 @login_required(login_url='/admin_login')
 def view_books(request):
-    books = Book.objects.all().order_by('id')  # fetch all books
-    return render(request, "view_books.html", {'books': books})
 
-# ------------------------------
-# VIEW ALL BOOKS (Admin)
-# ------------------------------
-@login_required(login_url='/admin_login')
-def view_books(request):
-    books = Book.objects.all()
-    return render(request, "view_books.html", {'books': books})
+    books = Book.objects.all().order_by('id')
+
+    return render(
+        request,
+        "view_books.html",
+        {
+            'books': books
+        }
+    )
 
 
-# ------------------------------
-# VIEW ALL STUDENTS (Admin)
-# ------------------------------
+# =========================================================
+# VIEW STUDENTS
+# =========================================================
+
 @login_required(login_url='/admin_login')
 def view_students(request):
-    students = Student.objects.all()
-    return render(request, "view_students.html", {'students': students})
 
+    students = Student.objects.all().order_by('id')
+
+    return render(
+        request,
+        "view_students.html",
+        {
+            'students': students
+        }
+    )
+
+
+# =========================================================
+# ISSUE BOOK
+# =========================================================
 
 # ------------------------------
 # ISSUE BOOK (Admin)
 # ------------------------------
 @login_required(login_url='/admin_login')
 def issue_book(request):
-    form = forms.IssueBookForm()
+
+    students = Student.objects.select_related('user').all().order_by(
+        'user__first_name',
+        'user__last_name'
+    )
+
+    books = Book.objects.all().order_by('name')
+
     if request.method == "POST":
-        form = forms.IssueBookForm(request.POST)
-        if form.is_valid():
-            obj = models.IssuedBook()
-            obj.student_id = request.POST['name2']
-            obj.isbn = request.POST['isbn2']
-            obj.save()
-            alert = True
-            return render(request, "issue_book.html", {'obj': obj, 'alert': alert})
-    return render(request, "issue_book.html", {'form': form})
+
+        student_id = request.POST.get('student_id')
+        isbn = request.POST.get('isbn')
+        issue_date = request.POST.get('issue_date')
+        expiry_date = request.POST.get('expiry_date')
+
+        # Check all fields
+        if not student_id or not isbn or not issue_date or not expiry_date:
+            return render(request, "issue_book.html", {
+                'students': students,
+                'books': books,
+                'error': 'Please fill in all fields.'
+            })
+
+        # Check student exists
+        student = Student.objects.filter(user_id=student_id).first()
+
+        if not student:
+            return render(request, "issue_book.html", {
+                'students': students,
+                'books': books,
+                'error': 'Selected student does not exist.'
+            })
+
+        # Check book exists
+        book = Book.objects.filter(isbn=isbn).first()
+
+        if not book:
+            return render(request, "issue_book.html", {
+                'students': students,
+                'books': books,
+                'error': 'Selected book does not exist.'
+            })
+
+        # Check whether this book is already issued
+        already_issued = IssuedBook.objects.filter(
+            isbn=str(book.isbn)
+        ).exists()
+
+        if already_issued:
+            return render(request, "issue_book.html", {
+                'students': students,
+                'books': books,
+                'error': f'"{book.name}" is already issued.'
+            })
+
+        # Create issued book
+        IssuedBook.objects.create(
+            student_id=str(student.user.id),
+            isbn=str(book.isbn),
+            issued_date=issue_date,
+            expiry_date=expiry_date
+        )
+
+        return render(request, "issue_book.html", {
+            'students': students,
+            'books': books,
+            'success': True
+        })
+
+    return render(request, "issue_book.html", {
+        'students': students,
+        'books': books
+    })
 
 
-# ------------------------------
-# VIEW ISSUED BOOKS (Admin)
-# ------------------------------
+# =========================================================
+# VIEW ISSUED BOOKS
+# =========================================================
+
 @login_required(login_url='/admin_login')
 def view_issued_book(request):
-    issuedBooks = IssuedBook.objects.all()
+
+    issued_books = IssuedBook.objects.all().order_by('-issued_date')
+
     details = []
 
-    for i in issuedBooks:
-        days = (date.today() - i.issued_date)
-        d = days.days
+    for issued in issued_books:
+
+        # Find book
+        book = Book.objects.filter(
+            isbn=issued.isbn
+        ).first()
+
+        # Find student
+        student = Student.objects.filter(
+            user_id=issued.student_id
+        ).first()
+
+        if not book or not student:
+            continue
+
+        # Calculate overdue days
+        days = (
+            date.today() - issued.issued_date
+        ).days
+
         fine = 0
-        if d > 14:
-            day = d - 14
-            fine = day * 5
 
-        books = list(models.Book.objects.filter(isbn=i.isbn))
-        students = list(models.Student.objects.filter(user=i.student_id))
-        idx = 0
-        for l in books:
-            t = (
-                students[idx].user,
-                students[idx].user_id,
-                books[idx].name,
-                books[idx].isbn,
-                issuedBooks[0].issued_date,
-                issuedBooks[0].expiry_date,
-                fine
-            )
-            idx += 1
-            details.append(t)
+        if days > 14:
+            fine = (days - 14) * 5
 
-    return render(request, "view_issued_book.html", {'issuedBooks': issuedBooks, 'details': details})
+        details.append({
+            'student': student.user,
+            'student_id': student.user.id,
+            'book': book.name,
+            'author': book.author,
+            'isbn': book.isbn,
+            'issued_date': issued.issued_date,
+            'expiry_date': issued.expiry_date,
+            'fine': fine,
+            'issued_id': issued.id,
+        })
+
+    return render(
+        request,
+        "view_issued_book.html",
+        {
+            'issuedBooks': issued_books,
+            'details': details
+        }
+    )
 
 
+# =========================================================
+# RETURN BOOK
+# =========================================================
+
+@login_required(login_url='/admin_login')
+def return_book(request, myid):
+
+    issued_book = IssuedBook.objects.filter(
+        id=myid
+    ).first()
+
+    if issued_book:
+        issued_book.delete()
+
+    return redirect("view_issued_book")
+
+
+# =========================================================
+# STUDENT ISSUED BOOKS
+# =========================================================
 # ------------------------------
-# STUDENT ISSUED BOOKS (Student)
+# STUDENT ISSUED BOOKS
 # ------------------------------
 @login_required(login_url='/student_login')
 def student_issued_books(request):
-    student = Student.objects.filter(user_id=request.user.id)
-    issuedBooks = IssuedBook.objects.filter(student_id=student[0].user_id)
-    li1 = []
-    li2 = []
 
-    for i in issuedBooks:
-        books = Book.objects.filter(isbn=i.isbn)
-        for book in books:
-            t = (request.user.id, request.user.get_full_name, book.name, book.author)
-            li1.append(t)
+    student = Student.objects.get(user=request.user)
 
-        days = (date.today() - i.issued_date)
-        d = days.days
+    issued_books = IssuedBook.objects.filter(
+        student_id=str(student.user.id)
+    ).order_by('-issued_date')
+
+    details = []
+
+    for issued in issued_books:
+
+        book = Book.objects.filter(
+            isbn=int(issued.isbn)
+        ).first()
+
+        days = (date.today() - issued.issued_date).days
+
         fine = 0
-        if d > 14:
-            day = d - 14
-            fine = day * 5
-        t = (issuedBooks[0].issued_date, issuedBooks[0].expiry_date, fine)
-        li2.append(t)
 
-    return render(request, 'student_issued_books.html', {'li1': li1, 'li2': li2})
+        if days > 14:
+            fine = (days - 14) * 5
+
+        if book:
+            details.append({
+                'book': book,
+                'issued_date': issued.issued_date,
+                'expiry_date': issued.expiry_date,
+                'fine': fine,
+            })
+
+    return render(
+        request,
+        'student_issued_books.html',
+        {
+            'details': details
+        }
+    )
 
 
-# ------------------------------
+# =========================================================
 # STUDENT PROFILE
-# ------------------------------
+# =========================================================
+
 @login_required(login_url='/student_login')
 def profile(request):
-    return render(request, "profile.html")
+
+    try:
+        student = Student.objects.get(
+            user=request.user
+        )
+    except Student.DoesNotExist:
+        student = None
+
+    return render(
+        request,
+        "profile.html",
+        {
+            'student': student
+        }
+    )
 
 
-# ------------------------------
-# EDIT PROFILE (Student)
-# ------------------------------
+# =========================================================
+# EDIT PROFILE
+# =========================================================
+
 @login_required(login_url='/student_login')
 def edit_profile(request):
-    student = Student.objects.get(user=request.user)
+
+    student = Student.objects.get(
+        user=request.user
+    )
+
     if request.method == "POST":
-        email = request.POST['email']
-        phone = request.POST['phone']
-        branch = request.POST['branch']
-        classroom = request.POST['classroom']
-        roll_no = request.POST['roll_no']
+
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        branch = request.POST.get('branch')
+        classroom = request.POST.get('classroom')
+        roll_no = request.POST.get('roll_no')
 
         student.user.email = email
         student.phone = phone
         student.branch = branch
         student.classroom = classroom
         student.roll_no = roll_no
+
         student.user.save()
         student.save()
-        alert = True
-        return render(request, "edit_profile.html", {'alert': alert})
-    return render(request, "edit_profile.html")
+
+        return render(
+            request,
+            "edit_profile.html",
+            {
+                'alert': True
+            }
+        )
+
+    return render(
+        request,
+        "edit_profile.html"
+    )
 
 
-# ------------------------------
-# DELETE BOOK (Admin)
-# ------------------------------
+# =========================================================
+# DELETE BOOK
+# =========================================================
+
 @login_required(login_url='/admin_login')
 def delete_book(request, myid):
-    books = Book.objects.filter(id=myid)
-    books.delete()
+
+    book = Book.objects.filter(
+        id=myid
+    ).first()
+
+    if book:
+        book.delete()
+
     return redirect("/view_books")
 
 
-# ------------------------------
-# DELETE STUDENT (Admin)
-# ------------------------------
+# =========================================================
+# DELETE STUDENT
+# =========================================================
+
 @login_required(login_url='/admin_login')
 def delete_student(request, myid):
-    students = Student.objects.filter(id=myid)
-    students.delete()
+
+    student = Student.objects.filter(
+        id=myid
+    ).first()
+
+    if student:
+        student.delete()
+
     return redirect("/view_students")
 
 
-# ------------------------------
-# CHANGE PASSWORD (Student)
-# ------------------------------
+# =========================================================
+# CHANGE PASSWORD
+# =========================================================
+
 @login_required(login_url='/student_login')
 def change_password(request):
+
     if request.method == "POST":
-        current_password = request.POST['current_password']
-        new_password = request.POST['new_password']
-        try:
-            u = User.objects.get(id=request.user.id)
-            if u.check_password(current_password):
-                u.set_password(new_password)
-                u.save()
-                alert = True
-                return render(request, "change_password.html", {'alert': alert})
-            else:
-                currpasswrong = True
-                return render(request, "change_password.html", {'currpasswrong': currpasswrong})
-        except:
-            pass
-    return render(request, "change_password.html")
+
+        current_password = request.POST.get(
+            'current_password'
+        )
+
+        new_password = request.POST.get(
+            'new_password'
+        )
+
+        user = User.objects.get(
+            id=request.user.id
+        )
+
+        if user.check_password(current_password):
+
+            user.set_password(new_password)
+            user.save()
+
+            return render(
+                request,
+                "change_password.html",
+                {
+                    'alert': True
+                }
+            )
+
+        return render(
+            request,
+            "change_password.html",
+            {
+                'currpasswrong': True
+            }
+        )
+
+    return render(
+        request,
+        "change_password.html"
+    )
 
 
-# ------------------------------
+# =========================================================
 # STUDENT REGISTRATION
-# ------------------------------
+# =========================================================
+
 def student_registration(request):
+
     if request.method == "POST":
-        username = request.POST['username']
-        first_name = request.POST['first_name']
-        last_name = request.POST['last_name']
-        email = request.POST['email']
-        phone = request.POST['phone']
-        branch = request.POST['branch']
-        classroom = request.POST['classroom']
-        roll_no = request.POST['roll_no']
-        image = request.FILES['image']
-        password = request.POST['password']
-        confirm_password = request.POST['confirm_password']
+
+        username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        branch = request.POST.get('branch')
+        classroom = request.POST.get('classroom')
+        roll_no = request.POST.get('roll_no')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+
+        image = request.FILES.get('image')
 
         if password != confirm_password:
-            passnotmatch = True
-            return render(request, "student_registration.html", {'passnotmatch': passnotmatch})
+
+            return render(
+                request,
+                "student_registration.html",
+                {
+                    'passnotmatch': True
+                }
+            )
+
+        # Prevent duplicate username
+        if User.objects.filter(
+            username=username
+        ).exists():
+
+            return render(
+                request,
+                "student_registration.html",
+                {
+                    'error': 'Username already exists.'
+                }
+            )
 
         user = User.objects.create_user(
             username=username,
@@ -240,7 +571,8 @@ def student_registration(request):
             first_name=first_name,
             last_name=last_name
         )
-        student = Student.objects.create(
+
+        Student.objects.create(
             user=user,
             phone=phone,
             branch=branch,
@@ -248,106 +580,197 @@ def student_registration(request):
             roll_no=roll_no,
             image=image
         )
-        user.save()
-        student.save()
-        alert = True
-        return render(request, "student_registration.html", {'alert': alert})
-    return render(request, "student_registration.html")
+
+        return render(
+            request,
+            "student_registration.html",
+            {
+                'alert': True
+            }
+        )
+
+    return render(
+        request,
+        "student_registration.html"
+    )
 
 
-# ------------------------------
+# =========================================================
 # STUDENT LOGIN
-# ------------------------------
+# =========================================================
+
 def student_login(request):
+
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(username=username, password=password)
+
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(
+            username=username,
+            password=password
+        )
 
         if user is not None:
+
+            if user.is_superuser:
+                return HttpResponse(
+                    "You are not a student!"
+                )
+
             login(request, user)
-            if request.user.is_superuser:
-                return HttpResponse("You are not a student!")
-            else:
-                return redirect("student_dashboard")
-        else:
-            alert = True
-            return render(request, "student_login.html", {'alert': alert})
-    return render(request, "student_login.html")
+
+            return redirect(
+                "student_dashboard"
+            )
+
+        return render(
+            request,
+            "student_login.html",
+            {
+                'alert': True
+            }
+        )
+
+    return render(
+        request,
+        "student_login.html"
+    )
 
 
-# ------------------------------
+# =========================================================
 # ADMIN LOGIN
-# ------------------------------
+# =========================================================
+
 def admin_login(request):
+
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(username=username, password=password)
+
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(
+            username=username,
+            password=password
+        )
 
         if user is not None:
+
+            if not user.is_superuser:
+                return HttpResponse(
+                    "You are not an admin."
+                )
+
             login(request, user)
-            if request.user.is_superuser:
-                return redirect("admin_dashboard")
-            else:
-                return HttpResponse("You are not an admin.")
-        else:
-            alert = True
-            return render(request, "admin_login.html", {'alert': alert})
-    return render(request, "admin_login.html")
+
+            return redirect(
+                "admin_dashboard"
+            )
+
+        return render(
+            request,
+            "admin_login.html",
+            {
+                'alert': True
+            }
+        )
+
+    return render(
+        request,
+        "admin_login.html"
+    )
 
 
-# ------------------------------
-# LOGOUT (Admin & Student)
-# ------------------------------
+# =========================================================
+# LOGOUT
+# =========================================================
+
 def Logout(request):
-    logout(request)
-    return redirect("/")
-    
 
-# ------------------------------
+    logout(request)
+
+    return redirect("/")
+
+
+# =========================================================
 # ADMIN DASHBOARD
-# ------------------------------
+# =========================================================
+
 @login_required(login_url='/admin_login')
 def admin_dashboard(request):
+
     total_books = Book.objects.count()
+
     total_students = Student.objects.count()
+
     issued_books = IssuedBook.objects.count()
-    overdue_books = IssuedBook.objects.filter(expiry_date__lt=timezone.now()).count()
-    available_books = total_books - issued_books
 
-    return render(request, 'admin_dashboard.html', {
-        'total_books': total_books,
-        'total_students': total_students,
-        'issued_books': issued_books,
-        'overdue_books': overdue_books,
-        'available_books': available_books,
-    })
+    overdue_books = IssuedBook.objects.filter(
+        expiry_date__lt=date.today()
+    ).count()
+
+    issued_isbns = set(
+        IssuedBook.objects.values_list(
+            'isbn',
+            flat=True
+        )
+    )
+
+    available_books = (
+        total_books -
+        len(issued_isbns)
+    )
+
+    return render(
+        request,
+        'admin_dashboard.html',
+        {
+            'total_books': total_books,
+            'total_students': total_students,
+            'issued_books': issued_books,
+            'overdue_books': overdue_books,
+            'available_books': max(
+                available_books,
+                0
+            ),
+        }
+    )
 
 
-# ------------------------------
+# =========================================================
 # STUDENT DASHBOARD
-# ------------------------------
+# =========================================================
+
 @login_required(login_url='/student_login')
 def student_dashboard(request):
-    student = Student.objects.get(user=request.user)
-    
-    # Filter using the correct field name
-    issued_books = IssuedBook.objects.filter(student_id=student.user.id)
-    
-    overdue_books = issued_books.filter(expiry_date__lt=timezone.now()).count()
-    available_books = Book.objects.exclude(isbn__in=issued_books.values_list('isbn', flat=True)).count()
 
-    return render(request, 'student_dashboard.html', {
-        'available_books': available_books,
-        'issued_books': issued_books.count(),
-        'overdue_books': overdue_books,
-    })
-@login_required(login_url='/student_login')
-def profile(request):
-    try:
-        student = Student.objects.get(user=request.user)  # Fetch student data
-    except Student.DoesNotExist:
-        student = None  # Handle case where student record doesn't exist
+    student = Student.objects.get(
+        user=request.user
+    )
 
-    return render(request, "profile.html", {'student': student})
+    issued_books = IssuedBook.objects.filter(
+        student_id=str(student.user.id)
+    )
+
+    overdue_books = issued_books.filter(
+        expiry_date__lt=date.today()
+    ).count()
+
+    issued_isbns = issued_books.values_list(
+        'isbn',
+        flat=True
+    )
+
+    available_books = Book.objects.exclude(
+        isbn__in=issued_isbns
+    ).count()
+
+    return render(
+        request,
+        'student_dashboard.html',
+        {
+            'available_books': available_books,
+            'issued_books': issued_books.count(),
+            'overdue_books': overdue_books,
+        }
+    )

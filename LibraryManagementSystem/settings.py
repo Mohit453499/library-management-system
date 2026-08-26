@@ -10,7 +10,7 @@ SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY',
     'django-insecure-local-development-key-change-in-production'
 )
-
+#DEBUG = True
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
@@ -91,14 +91,15 @@ USE_L10N = True
 USE_TZ = True
 
 # STATIC FILES CONFIGURATION
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')  # final collected static files
+# STATIC FILES
 
-# Local static files during development
+STATIC_URL = '/static/'
+
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "library/static")
+    BASE_DIR / 'library' / 'static',
 ]
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 # MEDIA FILES CONFIGURATION (for user uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'library/media')

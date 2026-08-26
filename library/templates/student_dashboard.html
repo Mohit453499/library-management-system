@@ -1,44 +1,333 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %}Student Dashboard{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <h2 class="fw-bold text-center mb-4">📚 Student Dashboard</h2>
-    <hr>
 
-    <!-- Stats Cards -->
+<div class="container py-5">
+
+    <!-- Welcome Header -->
+    <div class="dashboard-header mb-4">
+        <div>
+            <span class="badge bg-primary-subtle text-primary mb-2">
+                <i class="bi bi-person-circle me-1"></i> Student Portal
+            </span>
+
+            <h1 class="fw-bold mb-2">
+                Welcome to your Dashboard 👋
+            </h1>
+
+            <p class="text-muted mb-0">
+                Manage your books, track issued books and stay updated with your library activity.
+            </p>
+        </div>
+
+        <div class="dashboard-icon">
+            <i class="bi bi-book-half"></i>
+        </div>
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="row g-4 mb-5">
+
+        <!-- Available Books -->
+        <div class="col-md-4">
+            <div class="card stat-card h-100 border-0">
+                <div class="d-flex justify-content-between align-items-start">
+
+                    <div>
+                        <div class="stat-label mb-2">
+                            Available Books
+                        </div>
+
+                        <div class="stat-number">
+                            {{ available_books }}
+                        </div>
+
+                        <div class="small text-muted mt-2">
+                            Books currently available
+                        </div>
+                    </div>
+
+                    <div class="stat-icon">
+                        <i class="bi bi-book"></i>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Issued Books -->
+        <div class="col-md-4">
+            <div class="card stat-card h-100 border-0">
+                <div class="d-flex justify-content-between align-items-start">
+
+                    <div>
+                        <div class="stat-label mb-2">
+                            My Issued Books
+                        </div>
+
+                        <div class="stat-number">
+                            {{ issued_books }}
+                        </div>
+
+                        <div class="small text-muted mt-2">
+                            Books currently borrowed
+                        </div>
+                    </div>
+
+                    <div class="stat-icon issued">
+                        <i class="bi bi-journal-check"></i>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Overdue Books -->
+        <div class="col-md-4">
+            <div class="card stat-card h-100 border-0">
+                <div class="d-flex justify-content-between align-items-start">
+
+                    <div>
+                        <div class="stat-label mb-2">
+                            Overdue Books
+                        </div>
+
+                        <div class="stat-number">
+                            {{ overdue_books }}
+                        </div>
+
+                        <div class="small text-muted mt-2">
+                            Books requiring attention
+                        </div>
+                    </div>
+
+                    <div class="stat-icon overdue">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Quick Actions -->
     <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-primary text-white">
-                <i class="bi bi-book fs-1"></i>
-                <h4 class="fw-bold mt-2">{{ available_books }}</h4>
-                <p class="mb-0">Available Books</p>
+
+        <div class="col-lg-7">
+            <div class="card border-0 p-4 h-100">
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="section-icon me-3">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+
+                    <div>
+                        <h4 class="fw-bold mb-1">
+                            Quick Access
+                        </h4>
+
+                        <p class="text-muted mb-0">
+                            Access your library activity quickly.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-3 mt-3">
+
+                    <a href="/student_issued/"
+                       class="btn btn-primary px-4 py-2">
+                        <i class="bi bi-journal-text me-2"></i>
+                        My Issued Books
+                    </a>
+
+                   <a href="{% url 'browse_books' %}"
+   class="btn btn-outline-primary px-4 py-2">
+    <i class="bi bi-search me-2"></i>
+    Browse Books
+</a>
+
+                </div>
+
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-warning text-dark">
-                <i class="bi bi-clipboard-check fs-1"></i>
-                <h4 class="fw-bold mt-2">{{ issued_books }}</h4>
-                <p class="mb-0">My Issued Books</p>
+
+        <!-- Library Tip -->
+        <div class="col-lg-5">
+            <div class="card border-0 p-4 h-100 tip-card">
+
+                <div class="d-flex align-items-start">
+
+                    <div class="tip-icon me-3">
+                        <i class="bi bi-lightbulb"></i>
+                    </div>
+
+                    <div>
+                        <h5 class="fw-bold">
+                            Library Tip
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            Keep track of your due dates and return books on time
+                            to avoid overdue records.
+                        </p>
+                    </div>
+
+                </div>
+
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-danger text-white">
-                <i class="bi bi-exclamation-triangle fs-1"></i>
-                <h4 class="fw-bold mt-2">{{ overdue_books }}</h4>
-                <p class="mb-0">Overdue Books</p>
-            </div>
-        </div>
     </div>
 
-    <!-- Quick Access -->
-    <div class="text-center mt-4">
-        <a href="/student_issued/" class="btn btn-primary btn-lg">
-            <i class="bi bi-eye"></i> View My Issued Books
-        </a>
-    </div>
 </div>
+
+
+<!-- Dashboard-specific styling -->
+<style>
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 32px;
+    background: linear-gradient(
+        135deg,
+        #eff6ff,
+        #ffffff
+    );
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+}
+
+.dashboard-header h1 {
+    font-size: 2rem;
+    letter-spacing: -0.5px;
+}
+
+.dashboard-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2563eb;
+    color: white;
+    font-size: 2rem;
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+}
+
+.stat-card {
+    padding: 24px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.stat-number {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #172033;
+}
+
+.stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eff6ff;
+    color: #2563eb;
+
+    font-size: 1.4rem;
+}
+
+.stat-icon.issued {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.stat-icon.overdue {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.section-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #eff6ff;
+    color: #2563eb;
+
+    font-size: 1.2rem;
+}
+
+.tip-card {
+    background: linear-gradient(
+        135deg,
+        #f8fafc,
+        #ffffff
+    );
+}
+
+.tip-icon {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #fff7ed;
+    color: #ea580c;
+
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+
+    .dashboard-header {
+        padding: 22px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-icon {
+        width: 55px;
+        height: 55px;
+        font-size: 1.5rem;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+    }
+}
+
+</style>
+
 {% endblock %}

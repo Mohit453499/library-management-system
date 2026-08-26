@@ -1,80 +1,514 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <h2 class="fw-bold text-center mb-4">📊 Admin Dashboard</h2>
-    <hr>
 
-    <!-- Statistics Cards -->
+<div class="dashboard-container py-4">
+
+    <!-- HEADER -->
+    <div class="dashboard-header mb-4">
+        <div>
+            <p class="text-muted mb-1">Library Management System</p>
+
+            <h2 class="fw-bold mb-1">
+                <span id="greeting">Good Morning</span>, Admin 👋
+            </h2>
+
+            <p class="text-muted mb-0">
+                Monitor your library and manage daily activities from one place.
+            </p>
+        </div>
+
+        <div class="dashboard-date">
+            📅 <span id="currentDate"></span>
+        </div>
+    </div>
+
+
+    <!-- STATISTICS -->
     <div class="row g-4 mb-4">
-        <!-- Total Books -->
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-primary text-white">
-                <i class="bi bi-book fs-1"></i>
-                <h4 class="fw-bold mt-2">{{ total_books }}</h4>
-                <p class="mb-0">Total Books</p>
+
+        <!-- TOTAL BOOKS -->
+        <div class="col-xl col-md-6">
+            <div class="dashboard-stat-card stat-blue">
+                <div class="stat-icon">
+                    <i class="bi bi-book"></i>
+                </div>
+
+                <div>
+                    <p>Total Books</p>
+                    <h2>{{ total_books }}</h2>
+                    <span>
+                        <i class="bi bi-collection"></i>
+                        Complete Collection
+                    </span>
+                </div>
             </div>
         </div>
 
-        <!-- Total Students -->
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-success text-white">
-                <i class="bi bi-people-fill fs-1"></i>
-                <h4 class="fw-bold mt-2">{{ total_students }}</h4>
-                <p class="mb-0">Registered Students</p>
+
+        <!-- AVAILABLE BOOKS -->
+        <div class="col-xl col-md-6">
+            <div class="dashboard-stat-card stat-cyan">
+                <div class="stat-icon">
+                    <i class="bi bi-book-half"></i>
+                </div>
+
+                <div>
+                    <p>Available Books</p>
+                    <h2>{{ available_books }}</h2>
+                    <span>
+                        <i class="bi bi-check-circle"></i>
+                        Ready to Issue
+                    </span>
+                </div>
             </div>
         </div>
 
-        <!-- Issued Books -->
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-warning text-dark">
-                <i class="bi bi-arrow-left-right fs-1"></i>
-                <h4 class="fw-bold mt-2">{{ issued_books }}</h4>
-                <p class="mb-0">Issued Books</p>
+
+        <!-- STUDENTS -->
+        <div class="col-xl col-md-6">
+            <div class="dashboard-stat-card stat-green">
+                <div class="stat-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+
+                <div>
+                    <p>Registered Students</p>
+                    <h2>{{ total_students }}</h2>
+                    <span>
+                        <i class="bi bi-person-check"></i>
+                        Library Members
+                    </span>
+                </div>
             </div>
         </div>
 
-        <!-- Overdue Books -->
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-4 p-3 text-center bg-danger text-white">
-                <i class="bi bi-exclamation-triangle-fill fs-1"></i>
-                <h4 class="fw-bold mt-2">{{ overdue_books }}</h4>
-                <p class="mb-0">Overdue Books</p>
+
+        <!-- ISSUED -->
+        <div class="col-xl col-md-6">
+            <div class="dashboard-stat-card stat-orange">
+                <div class="stat-icon">
+                    <i class="bi bi-arrow-left-right"></i>
+                </div>
+
+                <div>
+                    <p>Issued Books</p>
+                    <h2>{{ issued_books }}</h2>
+                    <span>
+                        <i class="bi bi-clock-history"></i>
+                        Currently Borrowed
+                    </span>
+                </div>
             </div>
         </div>
+
+
+        <!-- OVERDUE -->
+        <div class="col-xl col-md-6">
+            <div class="dashboard-stat-card stat-red">
+                <div class="stat-icon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+
+                <div>
+                    <p>Overdue Books</p>
+                    <h2>{{ overdue_books }}</h2>
+                    <span>
+                        <i class="bi bi-bell"></i>
+                        Requires Attention
+                    </span>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Chart Section -->
-    <div class="card shadow border-0 rounded-4 p-4">
-        <h5 class="fw-bold mb-3">Books Overview</h5>
-        <canvas id="booksChart" height="120"></canvas>
+
+    <!-- ANALYTICS + QUICK ACTIONS -->
+    <div class="row g-4">
+
+        <!-- ANALYTICS -->
+        <div class="col-lg-7">
+            <div class="dashboard-panel h-100">
+
+                <div class="panel-header">
+                    <div>
+                        <h5>📊 Library Analytics</h5>
+                        <p>Current circulation status</p>
+                    </div>
+
+                    <span class="status-badge">
+                        ● Live Data
+                    </span>
+                </div>
+
+                <div class="chart-wrapper">
+
+                    <canvas id="booksChart"></canvas>
+
+                    <div id="chartEmptyState" class="chart-empty">
+                        <div>📚</div>
+                        <strong>No circulation data yet</strong>
+                        <p>
+                            Add books and issue them to students
+                            to see analytics here.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- QUICK ACTIONS -->
+        <div class="col-lg-5">
+            <div class="dashboard-panel quick-panel h-100">
+
+                <div class="panel-header">
+                    <h5>⚡ Quick Actions</h5>
+                    <p>Common library operations</p>
+                </div>
+
+                <div class="quick-actions">
+
+                    <a href="/add_book/" class="quick-action">
+                        <div class="quick-icon blue">
+                            <i class="bi bi-plus-lg"></i>
+                        </div>
+
+                        <div>
+                            <strong>Add New Book</strong>
+                            <small>Add a book to the collection</small>
+                        </div>
+
+                        <i class="bi bi-chevron-right arrow"></i>
+                    </a>
+
+
+                    <a href="/view_books/" class="quick-action">
+                        <div class="quick-icon green">
+                            <i class="bi bi-book"></i>
+                        </div>
+
+                        <div>
+                            <strong>View Books</strong>
+                            <small>Browse your library collection</small>
+                        </div>
+
+                        <i class="bi bi-chevron-right arrow"></i>
+                    </a>
+
+
+                    <a href="/issue_book/" class="quick-action">
+                        <div class="quick-icon orange">
+                            <i class="bi bi-arrow-right-circle"></i>
+                        </div>
+
+                        <div>
+                            <strong>Issue a Book</strong>
+                            <small>Issue a book to a student</small>
+                        </div>
+
+                        <i class="bi bi-chevron-right arrow"></i>
+                    </a>
+
+
+                    <a href="/view_students/" class="quick-action">
+                        <div class="quick-icon purple">
+                            <i class="bi bi-people"></i>
+                        </div>
+
+                        <div>
+                            <strong>Manage Students</strong>
+                            <small>View registered students</small>
+                        </div>
+
+                        <i class="bi bi-chevron-right arrow"></i>
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
     </div>
+
+
+    <!-- COLLECTION STATUS -->
+    <div class="row g-4 mt-1">
+
+        <div class="col-lg-6">
+            <div class="dashboard-panel">
+
+                <div class="panel-header">
+                    <h5>📚 Collection Status</h5>
+                    <p>Availability of your library collection</p>
+                </div>
+
+                <div class="collection-status">
+
+                    <div class="status-row">
+                        <span>Available</span>
+                        <strong id="availablePercent">0%</strong>
+                    </div>
+
+                    <div class="progress mb-4">
+                        <div
+                            id="availableProgress"
+                            class="progress-bar bg-primary"
+                            style="width: 0%">
+                        </div>
+                    </div>
+
+
+                    <div class="status-row">
+                        <span>Issued</span>
+                        <strong id="issuedPercent">0%</strong>
+                    </div>
+
+                    <div class="progress">
+                        <div
+                            id="issuedProgress"
+                            class="progress-bar bg-warning"
+                            style="width: 0%">
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- LIBRARY STATUS -->
+        <div class="col-lg-6">
+            <div class="dashboard-panel attention-panel">
+
+                <div class="panel-header">
+                    <h5>🔔 Library Status</h5>
+                    <p>Items requiring attention</p>
+                </div>
+
+                <div class="attention-content">
+
+                    <div class="attention-icon">
+                        ⚠️
+                    </div>
+
+                    <div>
+                        <h4 id="overdueMessage">
+                            Checking library status...
+                        </h4>
+
+                        <p id="overdueDescription">
+                            Please wait while the dashboard loads current information.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- TIP -->
+    <div class="dashboard-tip mt-4">
+
+        <div class="tip-icon">
+            💡
+        </div>
+
+        <div>
+            <strong>Library Management Tip</strong>
+
+            <p>
+                Keep your issued and returned book records updated
+                regularly to maintain accurate availability data.
+            </p>
+        </div>
+
+    </div>
+
 </div>
 
-<!-- Chart.js -->
+
+<!-- CHART.JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    const ctx = document.getElementById('booksChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Available Books', 'Issued Books', 'Overdue Books'],
-            datasets: [{
-                data: [{{ available_books }}, {{ issued_books }}, {{ overdue_books }}],
-                backgroundColor: ['#0d6efd', '#ffc107', '#dc3545'],
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    /* DATE */
+
+    const today = new Date();
+
+    document.getElementById("currentDate").innerText =
+        today.toLocaleDateString("en-IN", {
+            weekday: "long",
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+
+
+    /* GREETING */
+
+    const hour = today.getHours();
+
+    let greeting = "Good Morning";
+
+    if (hour >= 12 && hour < 17) {
+        greeting = "Good Afternoon";
+    } else if (hour >= 17) {
+        greeting = "Good Evening";
+    }
+
+    document.getElementById("greeting").innerText = greeting;
+
+
+    /* LIBRARY DATA */
+
+    const totalBooks = Number("{{ total_books|default:0 }}");
+    const availableBooks = Number("{{ available_books|default:0 }}");
+    const issuedBooks = Number("{{ issued_books|default:0 }}");
+    const overdueBooks = Number("{{ overdue_books|default:0 }}");
+
+
+    /* PERCENTAGES */
+
+    let availablePercent = 0;
+    let issuedPercent = 0;
+
+    if (totalBooks > 0) {
+        availablePercent =
+            Math.round((availableBooks / totalBooks) * 100);
+
+        issuedPercent =
+            Math.round((issuedBooks / totalBooks) * 100);
+    }
+
+    document.getElementById("availablePercent").innerText =
+        availablePercent + "%";
+
+    document.getElementById("issuedPercent").innerText =
+        issuedPercent + "%";
+
+    document.getElementById("availableProgress").style.width =
+        availablePercent + "%";
+
+    document.getElementById("issuedProgress").style.width =
+        issuedPercent + "%";
+
+
+    /* OVERDUE STATUS */
+
+    const overdueMessage =
+        document.getElementById("overdueMessage");
+
+    const overdueDescription =
+        document.getElementById("overdueDescription");
+
+    if (overdueBooks > 0) {
+
+        overdueMessage.innerText =
+            overdueBooks +
+            (overdueBooks > 1 ? " books are overdue" : " book is overdue");
+
+        overdueDescription.innerText =
+            "Review overdue records and update returned books.";
+
+    } else {
+
+        overdueMessage.innerText =
+            "Everything looks good! 🎉";
+
+        overdueDescription.innerText =
+            "There are currently no overdue books requiring attention.";
+    }
+
+
+    /* CHART */
+
+    const hasData =
+        totalBooks > 0 ||
+        issuedBooks > 0 ||
+        overdueBooks > 0;
+
+    const emptyState =
+        document.getElementById("chartEmptyState");
+
+    if (hasData) {
+
+        emptyState.style.display = "none";
+
+        const ctx =
+            document.getElementById("booksChart").getContext("2d");
+
+        new Chart(ctx, {
+
+            type: "doughnut",
+
+            data: {
+
+                labels: [
+                    "Available Books",
+                    "Issued Books",
+                    "Overdue Books"
+                ],
+
+                datasets: [{
+
+                    data: [
+                        availableBooks,
+                        issuedBooks,
+                        overdueBooks
+                    ],
+
+                    backgroundColor: [
+                        "#0d6efd",
+                        "#ffc107",
+                        "#dc3545"
+                    ],
+
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+
+            options: {
+
+                responsive: true,
+                maintainAspectRatio: false,
+
+                cutout: "68%",
+
+                plugins: {
+
+                    legend: {
+                        position: "bottom",
+
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+
                 }
+
             }
-        }
-    });
+
+        });
+    }
+
+});
+
 </script>
+
 {% endblock %}

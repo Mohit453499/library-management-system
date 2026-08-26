@@ -33,35 +33,93 @@
                 </tr>
             </thead>
             <tbody id="issuedTableBody" class="text-center">
-                {% if details %}
-                    {% for detail in details %}
-                    <tr {% if detail.6 > 0 %} class="table-danger" {% endif %}>
-                        <td>{{ forloop.counter }}</td>
-                        <td>
-                            <strong>{{ detail.0.get_full_name }}</strong><br>
-                            <small class="text-muted">ID: {{ detail.1 }}</small>
-                        </td>
-                        <td>{{ detail.2 }}</td>
-                        <td><span class="badge bg-secondary">{{ detail.3 }}</span></td>
-                        <td>{{ detail.4 }}</td>
-                        <td>{{ detail.5 }}</td>
-                        <td>
-                            {% if detail.6 > 0 %}
-                                <span class="badge bg-danger">₹{{ detail.6 }}</span>
-                            {% else %}
-                                <span class="badge bg-success">No Fine</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
+
+    {% if details %}
+
+        {% for detail in details %}
+
+        <tr {% if detail.fine > 0 %}class="table-danger"{% endif %}>
+
+            <td>
+                {{ forloop.counter }}
+            </td>
+
+            <td>
+                <strong>
+                    {{ detail.student.get_full_name }}
+                </strong>
+
+                <br>
+
+                <small class="text-muted">
+                    ID: {{ detail.student_id }}
+                </small>
+            </td>
+
+            <td>
+                <strong>{{ detail.book }}</strong>
+
+                <br>
+
+                <small class="text-muted">
+                    {{ detail.author }}
+                </small>
+            </td>
+
+            <td>
+                <span class="badge bg-secondary">
+                    {{ detail.isbn }}
+                </span>
+            </td>
+
+            <td>
+                {{ detail.issued_date }}
+            </td>
+
+            <td>
+                {{ detail.expiry_date }}
+            </td>
+
+            <td>
+
+                {% if detail.fine > 0 %}
+
+                    <span class="badge bg-danger">
+                        ₹{{ detail.fine }}
+                    </span>
+
                 {% else %}
-                    <tr>
-                        <td colspan="7" class="text-center text-muted">
-                            No issued books found.
-                        </td>
-                    </tr>
+
+                    <span class="badge bg-success">
+                        No Fine
+                    </span>
+
                 {% endif %}
-            </tbody>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    {% else %}
+
+        <tr>
+
+            <td colspan="7"
+                class="text-center text-muted py-4">
+
+                <i class="bi bi-journal-x fs-2 d-block mb-2"></i>
+
+                No issued books found.
+
+            </td>
+
+        </tr>
+
+    {% endif %}
+
+</tbody>
         </table>
     </div>
 </div>

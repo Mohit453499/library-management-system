@@ -1,0 +1,547 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Books - Library Management System{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="mb-4">
+
+        <span class="text-primary fw-bold small">
+            LIBRARY COLLECTION
+        </span>
+
+        <h1 class="fw-bold mt-2">
+            Browse Books
+        </h1>
+
+        <p class="text-muted">
+            Search and explore books available in our library.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         SEARCH & FILTER
+    ====================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4 browse-search-card">
+
+        <div class="card-body p-4">
+
+            <form method="GET">
+
+                <div class="row g-3">
+
+                    <!-- SEARCH -->
+
+                    <div class="col-md-7">
+
+                        <div class="input-group">
+
+                            <span class="input-group-text bg-white">
+                                <i class="bi bi-search"></i>
+                            </span>
+
+                            <input
+                                type="text"
+                                name="search"
+                                class="form-control"
+                                placeholder="Search by book name, author or ISBN..."
+                                value="{{ search }}"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CATEGORY -->
+
+                    <div class="col-md-3">
+
+                        <select
+                            name="category"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Categories
+                            </option>
+
+                            {% for category in categories %}
+
+                                <option
+                                    value="{{ category }}"
+                                    {% if selected_category == category %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ category }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- SEARCH BUTTON -->
+
+                    <div class="col-md-2">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100"
+                        >
+                            <i class="bi bi-search"></i>
+                            Search
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         BOOK COUNT
+    ====================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+
+            <h5 class="fw-bold mb-0">
+                Library Books
+            </h5>
+
+            {% if search or selected_category %}
+
+                <small class="text-muted">
+                    Filtered results
+                </small>
+
+            {% endif %}
+
+        </div>
+
+
+        <span class="badge bg-primary rounded-pill px-3 py-2">
+            {{ books|length }} Books
+        </span>
+
+    </div>
+
+
+    <!-- =====================================================
+         BOOKS
+    ====================================================== -->
+
+    {% if books %}
+
+        <div class="row g-4">
+
+            {% for book in books %}
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="card h-100 border-0 shadow-sm book-card">
+
+
+                        <!-- =================================================
+                             BOOK COVER
+                        ================================================== -->
+
+                        <div class="book-cover">
+
+                            <div class="book-cover-icon">
+                                📖
+                            </div>
+
+
+                            {% if book.category %}
+
+                                <span class="book-category">
+                                    {{ book.category }}
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- =================================================
+                             BOOK DETAILS
+                        ================================================== -->
+
+                        <div class="card-body p-4">
+
+                            <!-- BOOK NAME -->
+
+                            <h5
+                                class="fw-bold mb-2 book-title"
+                                title="{{ book.name }}"
+                            >
+                                {{ book.name }}
+                            </h5>
+
+
+                            <!-- AUTHOR -->
+
+                            <p class="text-muted mb-3">
+
+                                <i class="bi bi-person"></i>
+
+                                {{ book.author }}
+
+                            </p>
+
+
+                            <!-- BOOK INFORMATION -->
+
+                            <div class="book-info small text-muted mb-3">
+
+                                <div class="mb-2">
+
+                                    <strong>
+                                        ISBN:
+                                    </strong>
+
+                                    {{ book.isbn }}
+
+                                </div>
+
+
+                                {% if book.category %}
+
+                                    <div>
+
+                                        <strong>
+                                            Category:
+                                        </strong>
+
+                                        {{ book.category }}
+
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- =================================================
+                                 BOOK STATUS
+                            ================================================== -->
+
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                {% if book.isbn|stringformat:"s" in issued_isbns %}
+
+                                    <!-- ISSUED -->
+
+                                    <span class="badge rounded-pill bg-danger-subtle text-danger px-3 py-2">
+
+                                        <i class="bi bi-x-circle"></i>
+
+                                        Issued
+
+                                    </span>
+
+                                {% else %}
+
+                                    <!-- AVAILABLE -->
+
+                                    <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">
+
+                                        <i class="bi bi-check-circle"></i>
+
+                                        Available
+
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+    {% else %}
+
+        <!-- =================================================
+             NO BOOKS
+        ================================================== -->
+
+        <div class="no-books text-center py-5">
+
+            <div class="no-books-icon">
+                📚
+            </div>
+
+            <h4 class="fw-bold mt-3">
+                No books found
+            </h4>
+
+            <p class="text-muted">
+                Try a different book name, author, ISBN or category.
+            </p>
+
+            <a
+                href="{% url 'browse_books' %}"
+                class="btn btn-primary"
+            >
+
+                <i class="bi bi-arrow-clockwise"></i>
+
+                View All Books
+
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =====================================================
+     BROWSE BOOKS CSS
+====================================================== -->
+
+<style>
+
+/* =========================================
+   SEARCH CARD
+========================================= */
+
+.browse-search-card {
+
+    border-radius: 16px;
+
+}
+
+
+/* =========================================
+   BOOK CARD
+========================================= */
+
+.book-card {
+
+    border-radius: 18px;
+
+    overflow: hidden;
+
+    transition: all 0.25s ease;
+
+    border: 1px solid #e9ecef !important;
+
+}
+
+
+.book-card:hover {
+
+    transform: translateY(-6px);
+
+    box-shadow:
+        0 15px 35px rgba(0,0,0,0.10) !important;
+
+}
+
+
+/* =========================================
+   BOOK COVER
+========================================= */
+
+.book-cover {
+
+    height: 180px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    position: relative;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eaf2ff,
+            #d9e9ff
+        );
+
+}
+
+
+.book-cover-icon {
+
+    font-size: 65px;
+
+    filter:
+        drop-shadow(
+            0 8px 10px rgba(0,0,0,0.10)
+        );
+
+}
+
+
+/* =========================================
+   CATEGORY
+========================================= */
+
+.book-category {
+
+    position: absolute;
+
+    top: 12px;
+
+    right: 12px;
+
+    background: white;
+
+    color: #0d6efd;
+
+    padding: 6px 11px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 3px 10px rgba(0,0,0,0.06);
+
+}
+
+
+/* =========================================
+   BOOK TITLE
+========================================= */
+
+.book-title {
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+
+/* =========================================
+   BOOK INFORMATION
+========================================= */
+
+.book-info {
+
+    line-height: 1.6;
+
+}
+
+
+/* =========================================
+   NO BOOKS
+========================================= */
+
+.no-books {
+
+    background: white;
+
+    border-radius: 18px;
+
+    border: 1px solid #e9ecef;
+
+    padding: 70px 20px !important;
+
+}
+
+
+.no-books-icon {
+
+    font-size: 60px;
+
+}
+
+
+/* =========================================
+   STATUS
+========================================= */
+
+.bg-danger-subtle {
+
+    background-color: #f8d7da !important;
+
+}
+
+
+.text-danger {
+
+    color: #dc3545 !important;
+
+}
+
+
+.bg-success-subtle {
+
+    background-color: #d1e7dd !important;
+
+}
+
+
+.text-success {
+
+    color: #198754 !important;
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 576px) {
+
+    .container.py-5 {
+
+        padding-top: 35px !important;
+
+        padding-bottom: 35px !important;
+
+    }
+
+
+    .book-cover {
+
+        height: 160px;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}

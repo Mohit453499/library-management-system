@@ -22,4 +22,7 @@ urlpatterns = [
     path("delete_student/<int:myid>/", views.delete_student, name="delete_student"),
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
+    path("browse_books/", views.browse_books, name="browse_books"),
+    path("return_book/<int:myid>/", views.return_book, name="return_book"),
+    
 ]
