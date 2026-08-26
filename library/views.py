@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from datetime import date
+import os
 
 from .models import Book, Student, IssuedBook
 from .forms import IssueBookForm
@@ -643,6 +644,15 @@ def student_login(request):
 # =========================================================
 
 def admin_login(request):
+    admin_username = os.environ.get('ADMIN_USERNAME')
+    admin_password = os.environ.get('ADMIN_PASSWORD')
+
+    if admin_username and admin_password:
+        if not User.objects.filter(username=admin_username).exists():
+            User.objects.create_superuser(
+                username=admin_username,
+                password=admin_password
+            )
 
     if request.method == "POST":
 
