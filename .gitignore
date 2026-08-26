@@ -10,3 +10,4 @@ venv/
 *.sqlite3
 /staticfiles/
 /media/
+/library/media/

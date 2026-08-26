@@ -5,12 +5,9 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
-# SECURITY
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-local-development-key-change-in-production'
-)
-#DEBUG = True
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
@@ -22,6 +19,15 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     'https://library-management-system-xnh2.onrender.com',
 ]
+
+# Production security
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+SECURE_HSTS_SECONDS = 0 if DEBUG else 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
 # APPLICATIONS
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -106,3 +112,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'library/media')
 
 # DEFAULT AUTO FIELD
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+#T8jV0mJ1ylUu9fEHYfb9pIduPrWb4QRtDfnta3aIOSo94KWoS6Q8Z4QpIsX73NAQy-s
