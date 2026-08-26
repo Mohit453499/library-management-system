@@ -644,15 +644,20 @@ def student_login(request):
 # =========================================================
 
 def admin_login(request):
+
     admin_username = os.environ.get('ADMIN_USERNAME')
     admin_password = os.environ.get('ADMIN_PASSWORD')
 
     if admin_username and admin_password:
-        if not User.objects.filter(username=admin_username).exists():
-            User.objects.create_superuser(
-                username=admin_username,
-                password=admin_password
-            )
+
+        user, created = User.objects.get_or_create(
+            username=admin_username
+        )
+
+        user.set_password(admin_password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
 
     if request.method == "POST":
 
@@ -689,7 +694,6 @@ def admin_login(request):
         request,
         "admin_login.html"
     )
-
 
 # =========================================================
 # LOGOUT
